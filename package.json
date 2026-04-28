@@ -1,0 +1,25 @@
+{
+  "name": "blood-donation-and-emergency-matching",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stacy-wk/Blood-Donation-And-Emergency-Matching.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/stacy-wk/Blood-Donation-And-Emergency-Matching/issues"
+  },
+  "homepage": "https://github.com/stacy-wk/Blood-Donation-And-Emergency-Matching#readme",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
