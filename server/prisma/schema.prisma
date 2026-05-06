@@ -1,13 +1,138 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  DONOR
+  HOSPITAL
+  BLOOD_BANK
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+}
+
+enum HealthStatus {
+  HEALTHY
+  TEMPORARILY_INELIGIBLE
+  PERMANENTLY_INELIGIBLE
+}
+
+enum UrgencyLevel {
+  CRITICAL
+  HIGH
+  NORMAL
+}
+
+enum RequestStatus {
+  PENDING
+  MATCHED
+  FULFILLED
+  CANCELLED
+}
+
+model User {
+  id        String      @id @default(uuid())
+  email     String      @unique
+  password  String
+  role      Role
+  status    UserStatus  @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  donorProfile      DonorProfile?
+  hospitalProfile   HospitalProfile?
+  bloodBankProfile  BloodBankProfile?
+
+  notifications Notification[]
+}
+
+model DonorProfile {
+  id                String        @id @default(uuid())
+  userId            String        @unique
+  user              User          @relation(fields: [userId], references: [id])
+
+  bloodType         String
+  latitude          Float
+  longitude         Float
+
+  lastDonationDate  DateTime?
+  healthStatus      HealthStatus  @default(HEALTHY)
+
+  createdAt         DateTime      @default(now())
+}
+
+model HospitalProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+
+  name      String
+  latitude  Float
+  longitude Float
+
+  inventories      BloodInventory[]
+  emergencyRequests EmergencyRequest[]
+}
+
+model BloodBankProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+
+  name      String
+  latitude  Float
+  longitude Float
+
+  inventories BloodInventory[]
+}
+
+model BloodInventory {
+  id           String   @id @default(uuid())
+
+  bloodType    String
+  units        Int
+  expiryDate   DateTime
+
+  hospitalId   String?
+  hospital     HospitalProfile? @relation(fields: [hospitalId], references: [id])
+
+  bloodBankId  String?
+  bloodBank    BloodBankProfile? @relation(fields: [bloodBankId], references: [id])
+
+  createdAt    DateTime @default(now())
+}
+
+model EmergencyRequest {
+  id            String         @id @default(uuid())
+
+  hospitalId    String
+  hospital      HospitalProfile @relation(fields: [hospitalId], references: [id])
+
+  bloodType     String
+  unitsNeeded   Int
+  urgency       UrgencyLevel
+
+  status        RequestStatus  @default(PENDING)
+
+  createdAt     DateTime       @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  message   String
+  isRead    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
 }
